@@ -1,8 +1,8 @@
 
-# :mouse: Welcome to Space Invaders Unity with Pi Pico W Bluetooth Joystick 
+# :mouse: Welcome to Space Invaders Unity with Pi Pico W WiFi UDP Joystick 
 
 <p align="center">
- <img src="resource/Space-Invaders-Unity-logo.png" width="200">
+ <img src="resource/space-invaders-unity-logo.png" width="300">
 </p>
 
 <p align="center">
