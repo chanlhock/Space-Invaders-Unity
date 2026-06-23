@@ -413,6 +413,24 @@ void CalculateScreenBounds()
                 label.text = "YOU WIN!\nFinal Score: " + Score + "\nPress R to Restart or ESC to Quit";
             }
         }
+        if (hud != null)
+            hud.SetActive(false);
+            
+        // Clear invaders
+        if (invaderContainer != null)
+        {
+            foreach (Transform child in invaderContainer)
+            {
+                Destroy(child.gameObject);
+            }
+            invaderContainer.position = Vector3.zero;
+        }
+
+        // Reset player
+        if (player != null)
+        {
+            Destroy(player);
+        }
         Debug.Log("🏆 Player won! All invaders destroyed!");
     }
 
@@ -432,6 +450,22 @@ void CalculateScreenBounds()
 
         if (hud != null)
             hud.SetActive(false);
+
+        // Clear invaders
+        if (invaderContainer != null)
+        {
+            foreach (Transform child in invaderContainer)
+            {
+                Destroy(child.gameObject);
+            }
+            invaderContainer.position = Vector3.zero;
+        }
+
+        // Reset player
+        if (player != null)
+        {
+            Destroy(player);
+        }
 
         SoundManager.Instance?.PlayExplosion();
         Debug.Log("🔊 Playing explosion sound");

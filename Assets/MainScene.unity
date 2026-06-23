@@ -1483,7 +1483,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Searching for WiFi Joystick
+  m_text: Searching for WiFi Joystick...\n(Please turn on your Pi Pico W)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2200,11 +2200,11 @@ MonoBehaviour:
   packetText: {fileID: 730769972}
   rows: 3
   cols: 12
-  invaderSpeed: 0.5
+  invaderSpeed: 0.8
   invaderDropAmount: 0.5
-  invaderSpeedIncrease: 0.1
-  spacingX: 1
-  spacingY: 1
+  invaderSpeedIncrease: 0.2
+  spacingX: 1.2
+  spacingY: 1.2
   formationWidth: 660
 --- !u!4 &1179731424
 Transform:
