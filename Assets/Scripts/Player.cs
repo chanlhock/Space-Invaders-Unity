@@ -65,18 +65,22 @@ public class Player : MonoBehaviour
         if (cam != null)
         {
             float screenWidth = cam.orthographicSize * cam.aspect;
-            leftBound = -screenWidth + spriteHalfWidth;
-            rightBound = screenWidth - spriteHalfWidth;
+            leftBound = -screenWidth + spriteHalfWidth * 0.15f;
+            rightBound = screenWidth - spriteHalfWidth * 0.15f;
+            Debug.Log("Player Screenwidth: " + screenWidth);
         }
         else
         {
             leftBound = -7.5f;
             rightBound = 7.5f;
         }
+       
+        Debug.Log("Player leftBound: " + leftBound);
+        Debug.Log("Player rightBound: " + rightBound);
 
         // Start at center bottom
         targetX = 0f;
-        transform.position = new Vector3(0f, -4.5f, 0f);
+        transform.position = new Vector3(0f, -3.5f, 0f);
         Debug.Log("Player initialized at center: " + transform.position);
 
         // Create fire point if it doesn't exist
