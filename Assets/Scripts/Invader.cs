@@ -2,9 +2,25 @@ using UnityEngine;
 
 public class Invader : MonoBehaviour
 {
+    private bool isDestroyed = false;  // Prevent double destruction
+
     void Start()
     {
-        // Not needed for collision detection in Unity
+        // Ensure the invader has a collider
+        Collider2D col = GetComponent<Collider2D>();
+        if (col == null)
+        {
+            col = gameObject.AddComponent<BoxCollider2D>();
+        }
+        
+        // Make it a trigger
+        col.isTrigger = true;
+        
+        // Set tag to Invader
+        gameObject.tag = "Invader";
+        
+        // Log spawn position
+        Debug.Log($"👾 Invader spawned at: {transform.position}");
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -19,23 +35,41 @@ public class Invader : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            // Game Over
-            GameManager.Instance?.GameOver();
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.GameOver();
+            }
         }
     }
 
     public void TakeDamage()
     {
+        // Prevent double destruction
+        if (isDestroyed) return;
+        isDestroyed = true;
+
+        Debug.Log($"🎯 Invader taking damage! Remaining: {GameManager.Instance?.GetInvaderCount()}");
+        
         // Add score
-        GameManager.Instance?.AddScore(10);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddScore(10);
+        }
 
         // Play death sound
-        SoundManager.Instance?.PlayInvaderDeath();
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayInvaderDeath();
+        }
 
-        // Destroy this invader
+        // Destroy this invader FIRST
         Destroy(gameObject);
 
-        // Check if all invaders are destroyed
-        GameManager.Instance?.CheckAllInvadersDestroyed();
+        // THEN check if all invaders are destroyed
+        if (GameManager.Instance != null)
+        {
+            // Use Invoke to check after destruction
+            GameManager.Instance.CheckAllInvadersDestroyed();
+        }
     }
 }

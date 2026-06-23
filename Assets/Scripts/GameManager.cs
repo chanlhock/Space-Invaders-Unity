@@ -30,10 +30,13 @@ public class GameManager : MonoBehaviour
     [Header("Game Settings")]
     public int rows = 3;
     public int cols = 12;
-    public float invaderSpeed = 100f;
-    public float invaderDropAmount = 10f;
-    public float invaderSpeedIncrease = 8f;
-    public float formationWidth = 720f;
+    public float invaderSpeed = 0.002f;
+    public float invaderDropAmount = 0.002f;
+    public float invaderSpeedIncrease = 0.0005f;
+    public float spacingX = 0.8f;  // Small spacing for invaders
+    public float spacingY = 0.6f;
+    public float formationWidth = 660f;
+    private float screenHalfWidth = 8f;
 
     // Game state
     public int Score { get; private set; } = 0;
@@ -44,6 +47,12 @@ public class GameManager : MonoBehaviour
     private float currentInvaderSpeed;
     private bool isAtEdge = false;
     private int invaderCount = 0;
+
+    // Screen bounds - will be calculated from camera
+    private float screenLeft = -8f;
+    private float screenRight = 8f;
+    private float screenTop = 4.5f;
+    private float screenBottom = -4.5f;
 
     // Player
     private GameObject player;
@@ -66,6 +75,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        // Calculate screen bounds from camera
+        CalculateScreenBounds();
+
         // Show splash screen
         if (splashScreen != null)
             splashScreen.SetActive(true);
@@ -78,6 +90,28 @@ public class GameManager : MonoBehaviour
 
         // Start the connection search
         StartCoroutine(SearchForJoystick());
+        
+    }
+
+void CalculateScreenBounds()
+    {
+        Camera cam = Camera.main;
+        if (cam != null)
+        {
+            float height = cam.orthographicSize;
+            float width = height * cam.aspect;
+            
+            screenLeft = -width;
+            screenRight = width;
+            screenTop = height;
+            screenBottom = -height;
+            
+            Debug.Log($"📐 Screen bounds: Left={screenLeft}, Right={screenRight}, Top={screenTop}, Bottom={screenBottom}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Main Camera not found! Using default bounds.");
+        }
     }
 
     IEnumerator SearchForJoystick()
@@ -87,6 +121,13 @@ public class GameManager : MonoBehaviour
         if (connectionLabel != null)
         {
             connectionLabel.text = "Searching for WiFi Joystick...\n(Please turn on your Pi Pico W)";
+        }
+
+        // Start background music on splash screen
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayMusic();
+            Debug.Log("🎵 Background music started on splash screen");
         }
 
         // Wait 10 seconds for connection
@@ -146,6 +187,21 @@ public class GameManager : MonoBehaviour
         if (hud != null)
             hud.SetActive(true);
 
+        // Music continues playing during game
+        // (SoundManager music is already playing from splash screen)
+        // If it stopped for any reason, resume it:
+        if (SoundManager.Instance != null && !SoundManager.Instance.IsMusicPlaying())
+        {
+            SoundManager.Instance.ResumeMusic();
+            Debug.Log("🎵 Music resumed for gameplay");
+        }
+
+        // Reset invader container position
+        if (invaderContainer != null)
+        {
+            invaderContainer.position = Vector3.zero;
+        }
+
         // Spawn player
         if (playerPrefab != null)
         {
@@ -159,7 +215,8 @@ public class GameManager : MonoBehaviour
         Score = 0;
         currentInvaderSpeed = invaderSpeed;
         invaderDirection = 1;
-        invaderCount = rows * cols;
+        isAtEdge = false;
+        invaderCount = 0;
 
         // Update HUD
         UpdateScore();
@@ -184,24 +241,35 @@ public class GameManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        float startX = -((cols - 1) * 60f) / 2f;
-        float startY = 3f;
+        // Calculate start position - centered
+        float totalWidth = (cols - 1) * spacingX;
+        float startX = -totalWidth / 2f;
+        float startY = screenTop - 0.8f;  // Start near top of screen
 
+
+        // Reset container position
+        invaderContainer.position = Vector3.zero;
+        invaderCount = 0;
+
+        // Spawn invaders in grid
         for (int r = 0; r < rows; r++)
         {
             for (int c = 0; c < cols; c++)
             {
                 GameObject invader = Instantiate(invaderPrefab, invaderContainer);
+                // Set local position relative to container
                 invader.transform.localPosition = new Vector3(
-                    startX + c * 60f,
-                    startY - r * 50f,
+                    startX + c * spacingX,
+                    startY - r * spacingY,
                     0
                 );
                 invaderCount++;
             }
         }
 
-        invaderContainer.position = Vector3.zero;
+        Debug.Log($"✅ Spawned {invaderCount} invaders in {rows}x{cols} grid");
+        Debug.Log($"📐 Container position: {invaderContainer.position}");
+        //invaderContainer.position = Vector3.zero;
     }
 
     void Update()
@@ -217,14 +285,47 @@ public class GameManager : MonoBehaviour
             Application.Quit();
         }
 
-        if (!GameActive)
+        if (!GameActive || invaderContainer == null)
             return;
 
-        // 1. Move invaders
-        invaderContainer.position += Vector3.right * invaderDirection * currentInvaderSpeed * Time.deltaTime;
+        // Check if there are any invaders left
+        if (invaderContainer.childCount == 0)
+        {
+            // All invaders destroyed - don't try to move them
+            return;
+        }
 
-        // Check right edge
-        if (invaderContainer.position.x + formationWidth / 2f > 8f)
+        // Get the leftmost and rightmost invader positions
+        float minX = float.MaxValue;
+        float maxX = float.MinValue;
+        float minY = float.MaxValue;
+
+        foreach (Transform child in invaderContainer)
+        {
+            // Use world position (not local)
+            Vector3 worldPos = child.position;
+            if (worldPos.x < minX) minX = worldPos.x;
+            if (worldPos.x > maxX) maxX = worldPos.x;
+            if (worldPos.y < minY) minY = worldPos.y;
+        }
+
+        float formationWidth = maxX - minX;
+        float centerX = (minX + maxX) / 2f;
+
+        // Screen bounds (with padding)
+        float padding = 0.5f;
+        float leftBound = screenLeft + padding;
+        float rightBound = screenRight - padding;
+        //float halfScreen = screenHalfWidth - padding;
+
+        // Debug the positions
+        if (Time.frameCount % 120 == 0)  // Log every 2 seconds
+        {
+            Debug.Log($"📍 CenterX: {centerX:F2}, MinX: {minX:F2}, MaxX: {maxX:F2}, LeftBound: {leftBound:F2}, RightBound: {rightBound:F2}, Direction: {invaderDirection}");
+        }
+
+        // Check if hitting right edge
+        if (centerX + formationWidth / 2f > rightBound)
         {
             if (!isAtEdge)
             {
@@ -232,10 +333,11 @@ public class GameManager : MonoBehaviour
                 invaderContainer.position += Vector3.down * invaderDropAmount;
                 currentInvaderSpeed += invaderSpeedIncrease;
                 isAtEdge = true;
+                Debug.Log($"↔️ Invaders hit RIGHT edge at {centerX + formationWidth/2f:F2}. Direction: LEFT, Speed: {currentInvaderSpeed:F2}");
             }
         }
-        // Check left edge
-        else if (invaderContainer.position.x - formationWidth / 2f < -8f)
+        // Check if hitting left edge
+        else if (centerX - formationWidth / 2f < leftBound)
         {
             if (!isAtEdge)
             {
@@ -243,6 +345,7 @@ public class GameManager : MonoBehaviour
                 invaderContainer.position += Vector3.down * invaderDropAmount;
                 currentInvaderSpeed += invaderSpeedIncrease;
                 isAtEdge = true;
+                Debug.Log($"↔️ Invaders hit LEFT edge at {centerX - formationWidth/2f:F2}. Direction: RIGHT, Speed: {currentInvaderSpeed:F2}");
             }
         }
         else
@@ -250,9 +353,13 @@ public class GameManager : MonoBehaviour
             isAtEdge = false;
         }
 
-        // Check if invaders reached bottom
-        if (invaderContainer.position.y < -4f)
+        // Move invaders
+        invaderContainer.position += Vector3.right * invaderDirection * currentInvaderSpeed * Time.deltaTime;
+
+        // Check if invaders reached bottom (near player)
+        if (minY < screenBottom + 0.5f)
         {
+            Debug.Log($"💀 Invaders reached bottom! Y: {minY:F2}");
             GameOver();
         }
 
@@ -267,19 +374,35 @@ public class GameManager : MonoBehaviour
         UpdateScore();
     }
 
+    // Add this method to GameManager.cs
+    public int GetInvaderCount()
+    {
+        if (invaderContainer == null) return 0;
+        return invaderContainer.childCount;
+    }
+
     public void CheckAllInvadersDestroyed()
     {
+        if (invaderContainer == null) return;
+    
+        // Count remaining invaders
         invaderCount = invaderContainer.childCount;
-        Debug.Log("Invader Count: " + invaderCount);
+        Debug.Log($"👾 Invader Count: {invaderCount}");
 
-        if (invaderCount == 0)
+        if (invaderCount <= 1)
         {
-            GameWon();
+            // Use Invoke to ensure it runs after all destruction is complete
+            Invoke(nameof(GameWon), 0.1f);
         }
     }
 
+    // Make sure GameWon is called only once
+    private bool gameWonCalled = false;
     void GameWon()
     {
+        if (gameWonCalled) return;
+        gameWonCalled = true;
+    
         GameActive = false;
         if (gameOverScreen != null)
         {
@@ -290,6 +413,7 @@ public class GameManager : MonoBehaviour
                 label.text = "YOU WIN!\nFinal Score: " + Score + "\nPress R to Restart or ESC to Quit";
             }
         }
+        Debug.Log("🏆 Player won! All invaders destroyed!");
     }
 
     public void GameOver()
@@ -315,10 +439,16 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
+        gameWonCalled = false;  // Reset win flag
+
         // Clear invaders
-        foreach (Transform child in invaderContainer)
+        if (invaderContainer != null)
         {
-            Destroy(child.gameObject);
+            foreach (Transform child in invaderContainer)
+            {
+                Destroy(child.gameObject);
+            }
+            invaderContainer.position = Vector3.zero;
         }
 
         // Reset player
@@ -326,6 +456,17 @@ public class GameManager : MonoBehaviour
         {
             Destroy(player);
         }
+
+        // Music continues playing during restart
+        // Ensure it's playing if it stopped
+        if (SoundManager.Instance != null && !SoundManager.Instance.IsMusicPlaying())
+        {
+            SoundManager.Instance.ResumeMusic();
+        }
+        // Reset speed and direction
+        currentInvaderSpeed = invaderSpeed;
+        invaderDirection = 1;
+        isAtEdge = false;
 
         GameActive = false;
         StartGame();

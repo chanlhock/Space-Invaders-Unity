@@ -3,13 +3,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [Header("Movement")]
-    public float speed = 300f;
+    public float speed = 30f;
     public float smoothTime = 0.1f;
 
     [Header("Shooting")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireCooldown = 0.5f;
+    public float fireCooldown = 0.3f;
 
     private float lastFireTime = 0f;
     private float targetX;
@@ -34,14 +34,31 @@ public class Player : MonoBehaviour
             if (bulletPrefab == null)
             {
                 Debug.LogWarning("⚠️ Bullet prefab not assigned and not found in Resources!");
+                // Try to find it in the scene
+                bulletPrefab = Resources.Load<GameObject>("Prefabs/Bullet");
             }
         }
+
+        // Setup collider - ensure it's NOT a trigger
+        Collider2D col = GetComponent<Collider2D>();
+        if (col == null)
+        {
+            col = gameObject.AddComponent<BoxCollider2D>();
+        }
+        col.isTrigger = false;
+        
+        // Set tag
+        gameObject.tag = "Player";
 
         // Calculate bounds
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             spriteHalfWidth = sr.sprite.bounds.extents.x;
+        }
+        else
+        {
+            spriteHalfWidth = 0.3f;
         }
 
         Camera cam = Camera.main;
@@ -51,11 +68,25 @@ public class Player : MonoBehaviour
             leftBound = -screenWidth + spriteHalfWidth;
             rightBound = screenWidth - spriteHalfWidth;
         }
+        else
+        {
+            leftBound = -7.5f;
+            rightBound = 7.5f;
+        }
 
         // Start at center bottom
         targetX = 0f;
-        transform.position = new Vector3(0f, -4f, 0f);
+        transform.position = new Vector3(0f, -4.5f, 0f);
         Debug.Log("Player initialized at center: " + transform.position);
+
+        // Create fire point if it doesn't exist
+        if (firePoint == null)
+        {
+            GameObject fp = new GameObject("FirePoint");
+            fp.transform.parent = transform;
+            fp.transform.localPosition = new Vector3(0, 0.5f, 0);
+            firePoint = fp.transform;
+        }
     }
 
     void Update()
@@ -112,11 +143,6 @@ public class Player : MonoBehaviour
         {
             FireBullet();
             lastFireTime = Time.time;
-
-            if (keyboardFire)
-                Debug.Log("🔫 Keyboard fire!");
-            else if (joystickFire)
-                Debug.Log("🔫 Joystick fire!");
         }
     }
 
@@ -130,32 +156,14 @@ public class Player : MonoBehaviour
 
         // Use firePoint or position + offset
         Vector3 spawnPos = firePoint != null ? firePoint.position : 
-                          transform.position + new Vector3(0, 0.5f, 0);
+                          transform.position + new Vector3(0, 0.6f, 0);
 
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+        Debug.Log($"🔫 Bullet fired from: {spawnPos}");
 
-        // Play shoot sound
-        SoundManager.Instance?.PlayShoot();
-    }
-
-    // Debug function - press D key
-    void OnGUI()
-    {
-        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.D)
+        if (SoundManager.Instance != null)
         {
-            Debug.Log("=== Player Debug ===");
-            Debug.Log("Position: " + transform.position);
-            Debug.Log("Target X: " + targetX);
-            Debug.Log("Moving Left: " + movingLeft);
-            Debug.Log("Moving Right: " + movingRight);
-            if (GameInput.Instance != null)
-            {
-                Debug.Log("GameInput Connected: " + GameInput.Instance.IsDeviceConnected());
-                if (GameInput.Instance.IsDeviceConnected())
-                {
-                    Debug.Log("Calibrated X: " + GameInput.Instance.GetCalibratedX());
-                }
-            }
+            SoundManager.Instance.PlayShoot();
         }
     }
 }
