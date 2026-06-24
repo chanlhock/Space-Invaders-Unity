@@ -27,6 +27,11 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI calibrationText;
     public TextMeshProUGUI packetText;
 
+    // Slider bar references
+    public RectTransform joystickBar;        // The background bar
+    public RectTransform joystickIndicator;  // The indicator that moves
+    public RectTransform centerLine;         // The center line
+
     [Header("Game Settings")]
     public int rows = 3;
     public int cols = 12;
@@ -110,6 +115,14 @@ public class GameManager : MonoBehaviour
 
         if (hud != null)
             hud.SetActive(false);
+
+        // Hide joystickbar
+        if (joystickBar != null)
+            joystickBar.gameObject.SetActive(false);
+        if (joystickIndicator != null)
+            joystickIndicator.gameObject.SetActive(false);
+        if (centerLine != null)
+            centerLine.gameObject.SetActive(false);
 
         // Start the connection search
         StartCoroutine(SearchForJoystick());
@@ -226,6 +239,12 @@ void CalculateScreenBounds()
             playerImage.SetActive(false);
         if (loadingCircle != null)
             loadingCircle.SetActive(false);
+        if (joystickBar != null)
+            joystickBar.gameObject.SetActive(true);
+        if (joystickIndicator != null)
+            joystickIndicator.gameObject.SetActive(true);
+        if (centerLine != null)
+            centerLine.gameObject.SetActive(true);
             
         // Music continues playing during game
         // (SoundManager music is already playing from splash screen)
@@ -478,7 +497,13 @@ void CalculateScreenBounds()
         }
         if (hud != null)
             hud.SetActive(false);
-            
+        if (joystickBar != null)
+            joystickBar.gameObject.SetActive(false);
+        if (joystickIndicator != null)
+            joystickIndicator.gameObject.SetActive(false);
+        if (centerLine != null)
+            centerLine.gameObject.SetActive(false);
+
         // Clear invaders
         if (invaderContainer != null)
         {
@@ -513,6 +538,12 @@ void CalculateScreenBounds()
 
         if (hud != null)
             hud.SetActive(false);
+        if (joystickBar != null)
+            joystickBar.gameObject.SetActive(false);
+        if (joystickIndicator != null)
+            joystickIndicator.gameObject.SetActive(false);
+        if (centerLine != null)
+            centerLine.gameObject.SetActive(false);
 
         // Clear invaders
         if (invaderContainer != null)
@@ -607,6 +638,38 @@ void CalculateScreenBounds()
         }
     }
 
+    void UpdateJoystickBar(float calibratedX)
+    {
+        if (joystickBar == null || joystickIndicator == null) return;
+    
+        // Get the bar width
+        float barWidth = joystickBar.rect.width;
+    
+        // Calculate position: -100 to 100 -> 0 to barWidth
+        // calibratedX: -100 = left, 0 = center, 100 = right
+        float normalizedPos = (calibratedX + 100f) / 200f; // 0 to 1
+        float posX = normalizedPos * barWidth;
+    
+        // Clamp to bar bounds
+        posX = Mathf.Clamp(posX, 0, barWidth);
+    
+        // Update indicator position
+        Vector2 anchoredPos = joystickIndicator.anchoredPosition;
+        anchoredPos.x = posX - (joystickIndicator.rect.width / 2f);
+        joystickIndicator.anchoredPosition = anchoredPos;
+    
+        // Set indicator color based on intensity
+        Color indicatorColor = Color.yellow;
+        if (Mathf.Abs(calibratedX) > 50)
+            indicatorColor = Color.red;
+        else if (Mathf.Abs(calibratedX) > 20)
+            indicatorColor = new Color(1f, 0.5f, 0f); // Orange
+        else
+            indicatorColor = Color.yellow;
+    
+        joystickIndicator.GetComponent<Image>().color = indicatorColor;
+    }
+
     void UpdateJoystickDisplay()
     {
         if (GameInput.Instance == null)
@@ -640,14 +703,34 @@ void CalculateScreenBounds()
         }
 
         // Calibration
-        if (calibrationText != null && isConnected)
+        if (calibrationText != null)
         {
-            float calX = GameInput.Instance.GetCalibratedX();
-            string direction = "CENTER";
-            if (calX < -10) direction = "LEFT";
-            else if (calX > 10) direction = "RIGHT";
-            calibrationText.text = $"Calib: {calX:+F1}%  [{direction}]";
-            calibrationText.color = Mathf.Abs(calX) > 50 ? Color.red : Mathf.Abs(calX) > 20 ? Color.yellow : Color.white;
+            if (isConnected)
+            {
+                float calX = GameInput.Instance.GetCalibratedX();
+                string direction = "CENTER";
+                if (calX < -10) direction = "LEFT";
+                else if (calX > 10) direction = "RIGHT";
+                calibrationText.text = $"Calib: {calX:+F1}%  [{direction}]";
+            
+                // Color based on intensity (matching your Godot reference)
+                if (Mathf.Abs(calX) > 50)
+                    calibrationText.color = Color.red;
+                else if (Mathf.Abs(calX) > 20)
+                    calibrationText.color = new Color(1f, 0.5f, 0f); // Orange
+                else
+                    calibrationText.color = Color.white;
+            
+                // Update the slider bar
+                UpdateJoystickBar(calX);
+            }
+            else
+            {
+                calibrationText.text = "Calib: +0.0%";
+                calibrationText.color = Color.white;
+                // Reset slider to center
+                UpdateJoystickBar(0);
+            }
         }
 
         // Packet count
