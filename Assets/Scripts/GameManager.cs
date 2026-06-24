@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
     public float spacingX = 0.8f;  // Small spacing for invaders
     public float spacingY = 0.6f;
     public float formationWidth = 660f;
-    private float screenHalfWidth = 8f;
+
 
     // Game state
     public int Score { get; private set; } = 0;
@@ -165,10 +165,11 @@ void CalculateScreenBounds()
         // Wait for SPACE key
         while (!Input.GetKeyDown(KeyCode.Space))
         {
-            // Allow ESC to quit
+            // Allow ESC to quit during splash screen
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Application.Quit();
+                QuitGame();
+                yield break;
             }
             yield return null;
         }
@@ -274,15 +275,18 @@ void CalculateScreenBounds()
 
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            QuitGame();
+            return;     // Don't process anything else
+        }
+
         // Handle restart and quit globally
         if (Input.GetKeyDown(KeyCode.R) && !GameActive && gameOverScreen != null && gameOverScreen.activeSelf)
         {
             RestartGame();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Application.Quit();
+            return;
         }
 
         if (!GameActive || invaderContainer == null)
@@ -357,7 +361,7 @@ void CalculateScreenBounds()
         invaderContainer.position += Vector3.right * invaderDirection * currentInvaderSpeed * Time.deltaTime;
 
         // Check if invaders reached bottom (near player)
-        if (minY < screenBottom + 0.5f)
+        if (minY < screenBottom + 3f)
         {
             Debug.Log($"💀 Invaders reached bottom! Y: {minY:F2}");
             GameOver();
@@ -366,8 +370,28 @@ void CalculateScreenBounds()
         // Update HUD
         UpdateFPS();
         UpdateJoystickDisplay();
+        UpdateSoundStatus();
     }
 
+    void QuitGame()
+    {
+        Debug.Log("🚪 Quitting game...");
+        
+        // Stop UDP thread
+        if (GameInput.Instance != null)
+        {
+            GameInput.Instance.StopListening();
+        }
+
+        // Quit the application
+        #if UNITY_EDITOR
+            // If running in the Unity Editor, stop playing
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            // If running as a built game, quit
+            Application.Quit();
+        #endif
+    }
     public void AddScore(int points)
     {
         Score += points;

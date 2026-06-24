@@ -56,8 +56,28 @@ public class GameInput : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("GameInput: Starting UDP listener on port " + listenPort);
+        Debug.Log($"GameInput: Starting UDP listener on port {listenPort}");
+        Debug.Log($"GameInput: Listening on all interfaces (0.0.0.0)");
+        Debug.Log($"GameInput: Make sure Pi Pico is sending to IP: {GetLocalIPAddress()}");
+        Debug.Log($"GameInput: IMPORTANT - Windows Firewall may block UDP port {listenPort}");
         StartUDPListener();
+    }
+
+    string GetLocalIPAddress()
+    {
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+        }
+        catch { }
+        return "192.168.x.x (check your network)";
     }
 
     void StartUDPListener()
@@ -72,35 +92,65 @@ public class GameInput : MonoBehaviour
         UdpClient udpServer = null;
         try
         {
+            // Bind to all network interfaces on the specified port
             udpServer = new UdpClient(new IPEndPoint(IPAddress.Any, listenPort));
+            
+            // Set timeout to 100ms to allow thread to check if it should stop
+            udpServer.Client.ReceiveTimeout = 100;
+            
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
+            Debug.Log($"GameInput: UDP Server bound to port {listenPort}");
 
             while (threadRunning)
             {
                 try
                 {
-                    byte[] data = udpServer.Receive(ref remoteEP);
-                    string message = Encoding.UTF8.GetString(data);
-                    lock (packetQueue)
+                    // Check if data is available using Poll (non-blocking)
+                    if (udpServer.Client.Poll(100, SelectMode.SelectRead))
                     {
-                        packetQueue.Enqueue(message);
+                        byte[] data = udpServer.Receive(ref remoteEP);
+                        string message = Encoding.UTF8.GetString(data);
+                        
+                        // Debug first few packets
+                        if (packetCount < 5)
+                        {
+                            Debug.Log($"GameInput: Packet received from {remoteEP.Address}:{remoteEP.Port}");
+                            Debug.Log($"GameInput: Data: {message}");
+                        }
+                        
+                        lock (packetQueue)
+                        {
+                            packetQueue.Enqueue(message);
+                        }
                     }
                 }
                 catch (SocketException ex)
                 {
-                    Debug.LogError("UDP error: " + ex.Message);
+                    // Timeout is expected, ignore
+                    if (ex.SocketErrorCode != SocketError.TimedOut)
+                    {
+                        Debug.LogError($"GameInput: Socket error: {ex.Message}");
+                    }
                 }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"GameInput: Error receiving packet: {ex.Message}");
+                }
+                
+                // Small sleep to prevent CPU spike
+                Thread.Sleep(10);
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError("Failed to start UDP listener: " + ex.Message);
+            Debug.LogError($"GameInput: Failed to start UDP listener: {ex.Message}");
         }
         finally
         {
             if (udpServer != null)
             {
                 udpServer.Close();
+                Debug.Log("GameInput: UDP server closed");
             }
         }
     }
@@ -117,8 +167,8 @@ public class GameInput : MonoBehaviour
             }
         }
 
-        // Timeout after 2 seconds
-        if (deviceConnected && Time.time - lastPacketTime > 2f)
+        // Timeout after 3 seconds
+        if (deviceConnected && Time.time - lastPacketTime > 3f)
         {
             deviceConnected = false;
             Debug.Log("GameInput: Disconnected - timeout");
@@ -130,36 +180,44 @@ public class GameInput : MonoBehaviour
         packetCount++;
         lastPacketTime = Time.time;
 
-        // Parse CSV: x_val,y_val,x_percent,y_percent,button
-        string[] parts = dataString.Split(',');
-        if (parts.Length >= 5)
+        try
         {
-            float xPercent = float.Parse(parts[2]) / 100f;
-            float yPercent = float.Parse(parts[3]) / 100f;
-            int buttonVal = int.Parse(parts[4]);
-
-            rawJoystickX = xPercent;
-            rawJoystickY = yPercent;
-
-            calibratedX = CalibrateJoystick(xPercent);
-            calibratedY = CalibrateJoystick(yPercent);
-
-            buttonPressed = (buttonVal == 1);
-
-            if (!deviceConnected)
+            // Parse CSV: x_val,y_val,x_percent,y_percent,button
+            string[] parts = dataString.Split(',');
+            if (parts.Length >= 5)
             {
-                deviceConnected = true;
-                Debug.Log("GameInput: ✅ Connected to Pi Pico W! (Packet " + packetCount + ")");
-            }
+                float xPercent = float.Parse(parts[2]) / 100f;
+                float yPercent = float.Parse(parts[3]) / 100f;
+                int buttonVal = int.Parse(parts[4]);
 
-            // Debug occasionally
-            if (packetCount % 10 == 0)
-            {
-                string direction = "CENTER";
-                if (calibratedX < -10) direction = "LEFT";
-                else if (calibratedX > 10) direction = "RIGHT";
-                // Debug.Log("DEBUG - Raw X=" + xPercent + " | Calibrated=" + calibratedX + " | " + direction);
+                rawJoystickX = xPercent;
+                rawJoystickY = yPercent;
+
+                calibratedX = CalibrateJoystick(xPercent);
+                calibratedY = CalibrateJoystick(yPercent);
+
+                buttonPressed = (buttonVal == 1);
+
+                if (!deviceConnected)
+                {
+                    deviceConnected = true;
+                    Debug.Log($"GameInput: ✅ Connected to Pi Pico W! (Packet {packetCount})");
+                }
+
+                // Debug every 20 packets
+                if (packetCount % 20 == 0)
+                {
+                    Debug.Log($"GameInput: Packet {packetCount} - Raw X={rawJoystickX:F2}, Calibrated={calibratedX:F2}, Button={buttonPressed}");
+                }
             }
+            else
+            {
+                Debug.LogWarning($"GameInput: Invalid packet format: {dataString}");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"GameInput: Error parsing packet: {ex.Message}");
         }
     }
 
@@ -195,6 +253,24 @@ public class GameInput : MonoBehaviour
     public Vector2 GetMovementVector() => new Vector2(GetJoystickX(), -GetJoystickY());
 
     void OnDestroy()
+    {
+        threadRunning = false;
+        if (udpThread != null && udpThread.IsAlive)
+        {
+            udpThread.Join(1000);
+        }
+    }
+    public void StopListening()
+    {
+        threadRunning = false;
+        Debug.Log("GameInput: Stopping UDP listener...");
+    
+        if (udpThread != null && udpThread.IsAlive)
+        {
+            udpThread.Join(1000);
+        }
+}
+    void OnApplicationQuit()
     {
         threadRunning = false;
         if (udpThread != null && udpThread.IsAlive)
