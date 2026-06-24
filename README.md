@@ -125,9 +125,9 @@ So today I prompt generated Space Invaders Unity through DeepSeek.
 Completed by end of the day all the setting, prefab and scripts but unfortunately game when run is not displaying anything.
 - 23rd June 2026: Finally gotten the Space Invader game to work on Unity. 
 Spent whole day familiarising with the Unity way of adjusting the location of HUD, text in game mode.
-- 24th June 2026: Completed most of the features except left the moving slider for representing Calib
-and also having invader & player sprite in the SplashScreen. The rotating circle during Joystick connection also not there yet.
-Due to me running Unity on MacBook Air, I found that I need to turn off firewall before trying to connect to the WiFi UDP Joystick.
+- 24th June 2026: Completed all of the features including the moving slider for representing Calib
+and also having invader & player sprite in the SplashScreen. The rotating circle during Joystick connection is completed.
+Due to me running Unity on MacBook Air, found that I need to turn off firewall before trying to connect to the WiFi UDP Joystick.
 
 ## :coffee: Buy Me a Coffee
 If you appreciate my work, do support me by...<br>
