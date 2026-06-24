@@ -36,7 +36,7 @@ I have tested on Raspberry Pi Pico W and MacBook Air 2017 Unity 6.4.
 
 On the Raspberry Pi Pico W:
 1. Do ensure that the Raspberry Pi Pico W is flashed with the correct *.uf2 file
-2. The RPI_PICO_W-20251209-v1.27.0.uf2 file can be downloaded from /resource folder in this repository.
+2. The RPI_PICO_W-20251209-v1.27.0.uf2 file can be downloaded from /resource/Pi Pico W Joystick Unity/ folder in this repository.
 3. Open Thonny and upload all the files in the repository folder /resource/Pi Pico W Joystick Unity/ onto Raspberry Pi Pico W. Program is using MicroPython.
 4. Open the file Pico_W_Joystick_WiFi_Unity.py
 5. Run Pico_W_Joystick_WiFi_Unity.py. The following output will be displayed in the Thonny run window.
