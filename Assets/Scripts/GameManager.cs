@@ -37,6 +37,11 @@ public class GameManager : MonoBehaviour
     public float spacingY = 0.6f;
     public float formationWidth = 660f;
 
+    [Header("Splash Screen References")]
+    public GameObject invaderImage;      // The invader sprite on splash screen
+    public GameObject playerImage;       // The player ship on splash screen
+    public GameObject loadingCircle;     // The rotating loading circle
+    public TextMeshProUGUI pressSpaceLabel;  // "Press SPACE to Start" label
 
     // Game state
     public int Score { get; private set; } = 0;
@@ -81,6 +86,24 @@ public class GameManager : MonoBehaviour
         // Show splash screen
         if (splashScreen != null)
             splashScreen.SetActive(true);
+
+        // Show loading circle
+        if (loadingCircle != null)
+        {
+            loadingCircle.SetActive(true);
+            // Start the rotation animation
+            LoadingCircle circleScript = loadingCircle.GetComponent<LoadingCircle>();
+            if (circleScript == null)
+            {
+                circleScript = loadingCircle.AddComponent<LoadingCircle>();
+            }
+        }
+
+        // Show invader and player on splash screen
+        if (invaderImage != null)
+            invaderImage.SetActive(true);
+        if (playerImage != null)
+            playerImage.SetActive(true);
 
         if (gameOverScreen != null)
             gameOverScreen.SetActive(false);
@@ -152,6 +175,12 @@ void CalculateScreenBounds()
             yield return null;
         }
 
+        // Hide loading circle when search completes
+        if (loadingCircle != null)
+        {
+            loadingCircle.SetActive(false);
+        }
+
         // If not connected after timeout
         if (GameInput.Instance == null || !GameInput.Instance.IsDeviceConnected())
         {
@@ -188,6 +217,16 @@ void CalculateScreenBounds()
         if (hud != null)
             hud.SetActive(true);
 
+        if (splashScreen != null)
+            splashScreen.SetActive(false);
+
+        if (invaderImage != null)
+            invaderImage.SetActive(false);
+        if (playerImage != null)
+            playerImage.SetActive(false);
+        if (loadingCircle != null)
+            loadingCircle.SetActive(false);
+            
         // Music continues playing during game
         // (SoundManager music is already playing from splash screen)
         // If it stopped for any reason, resume it:
