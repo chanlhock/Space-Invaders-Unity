@@ -189,6 +189,7 @@ Spent whole day familiarising with the Unity way of adjusting the location of HU
 - 24th June 2026: Completed all of the features including the moving slider for representing Calib
 and also having invader & player sprite in the SplashScreen. The rotating circle during Joystick connection is completed.
 Due to me running Unity on MacBook Air, found that I need to turn off firewall before trying to connect to the WiFi UDP Joystick.
+- 25th June 2026: Completed the Space Invaders Unity project. Built the app program that is standalone and runnable on my MacBook Air 2017. Finally, I have published and released v1.0.0 version of space-invaders.app.
 
 ## :coffee: Buy Me a Coffee
 If you appreciate my work, do support me by...<br>
