@@ -44,34 +44,74 @@ On the Raspberry Pi Pico W:
 Note: You can rename Pico_W_Joystick_WiFi_Unity.py to main.py so that the program will automatically run when Raspberry Pi Pico W power up.
 ~~~~
 MPY: soft reboot
-Initializing BLE...
-Registering services...
-Service registered, handle: 9
-Advertising as 'Joystick_Pico'
 
-========================================
-PICO W READY - Move the joystick!
-========================================
+==================================================
+PICO W JOYSTICK - DIRECT TO UNITY
+==================================================
+Connecting to WiFi: chanhome 2.4GHz
+Connecting... 14s left
+Connecting... 13s left
+Connecting... 12s left
+✓ WiFi connected! IP: 192.168.0.19
+✓ UDP socket created
+Sending directly to Unity at 192.168.0.15:9000
+
+✓ Ready! Sending joystick data directly to Unity...
 Press Ctrl+C to stop
 
-Local: X=50444 ( 76%), Y=50428 ( 76%), Button=Released
-Local: X=50476 ( 77%), Y=50636 ( 77%), Button=Released
-Local: X=50620 ( 77%), Y=50844 ( 77%), Button=Released
-Local: X=  304 (  0%), Y=60590 ( 92%), Button=Released
-Local: X=50364 ( 76%), Y=50524 ( 77%), Button=Released
-Local: X=65535 (100%), Y=65535 (100%), Button=Released
-Local: X=65535 (100%), Y=65535 (100%), Button=Released
-Local: X=50508 ( 77%), Y=23861 ( 36%), Button=Released
-Local: X=57838 ( 88%), Y=50492 ( 77%), Button=Released
-Local: X=65535 (100%), Y=65535 (100%), Button=Released
-Local: X=65535 (100%), Y=64671 ( 98%), Button=Released
-Local: X=50364 ( 76%), Y=50524 ( 77%), Button=Released
-Local: X=50476 ( 77%), Y=50476 ( 77%), Button=Released
-Local: X=50508 ( 77%), Y=50460 ( 76%), Button=Released
-Local: X=50268 ( 76%), Y=50572 ( 77%), Button=Released
-Local: X=50380 ( 76%), Y=50540 ( 77%), Button=Released
-Local: X=50284 ( 76%), Y=50524 ( 77%), Button=Released
-
+[5] X= 77% (50764), Y= 77% (50796), Button=Released
+[10] X= 77% (50844), Y= 77% (50796), Button=Released
+[15] X= 77% (50860), Y= 77% (50860), Button=Released
+[20] X= 77% (50828), Y= 77% (50844), Button=Released
+[25] X= 77% (50764), Y= 77% (50828), Button=Released
+[30] X= 77% (50828), Y= 77% (50876), Button=Released
+[35] X= 77% (50828), Y= 77% (50876), Button=Released
+[40] X= 77% (50844), Y= 77% (50812), Button=Released
+[45] X= 77% (50780), Y= 77% (50844), Button=Released
+[50] X= 77% (50764), Y= 77% (50860), Button=Released
+[55] X= 77% (50780), Y= 77% (50844), Button=Released
+[60] X= 77% (50828), Y= 77% (50828), Button=Released
+[65] X= 77% (50764), Y= 77% (50844), Button=Released
+[70] X= 77% (50764), Y= 77% (50844), Button=Released
+[75] X= 77% (50796), Y= 77% (50780), Button=Released
+[80] X= 77% (50764), Y= 77% (50828), Button=Released
+[85] X= 77% (50764), Y= 77% (50828), Button=Released
+[90] X= 77% (50828), Y= 77% (50828), Button=Released
+[95] X= 77% (50764), Y= 77% (50780), Button=Released
+[100] X= 77% (50828), Y= 77% (50844), Button=Released
+[105] X= 77% (50796), Y= 77% (50844), Button=Released
+[110] X= 77% (50780), Y= 77% (50828), Button=Released
+[115] X= 77% (50828), Y= 77% (50812), Button=Released
+[120] X= 77% (50716), Y= 77% (50828), Button=Released
+[125] X= 77% (50796), Y= 77% (50844), Button=Released
+[130] X= 77% (50796), Y= 77% (50700), Button=Released
+[135] X= 99% (65007), Y= 77% (50844), Button=Released
+[140] X= 25% (16900), Y= 77% (50732), Button=Released
+[145] X= 77% (50764), Y= 77% (50716), Button=Released
+[150] X= 77% (50764), Y= 77% (50764), Button=Released
+[155] X= 77% (50732), Y= 89% (58654), Button=Pressed
+[160] X= 77% (50764), Y= 77% (50828), Button=Pressed
+[165] X= 77% (50620), Y= 77% (50764), Button=Pressed
+[170] X= 77% (50748), Y= 77% (50780), Button=Released
+[175] X= 77% (50764), Y= 77% (50876), Button=Released
+[180] X= 77% (50796), Y= 92% (60382), Button=Released
+[185] X= 89% (58926), Y=100% (65535), Button=Released
+[190] X= 99% (65295), Y=100% (65535), Button=Pressed
+[195] X= 77% (50732), Y= 77% (50796), Button=Pressed
+[200] X= 77% (50780), Y= 77% (50780), Button=Released
+[205] X= 56% (36889), Y= 77% (50764), Button=Pressed
+[210] X= 45% (30039), Y= 77% (50780), Button=Released
+[215] X= 77% (50748), Y= 77% (50844), Button=Released
+[220] X= 77% (50828), Y= 77% (50828), Button=Released
+[225] X= 12% ( 8017), Y= 77% (50796), Button=Released
+[230] X= 37% (24325), Y= 77% (50780), Button=Released
+[235] X= 77% (50764), Y= 77% (50844), Button=Released
+[240] X= 77% (50844), Y= 77% (50796), Button=Released
+[245] X= 77% (50796), Y= 77% (50828), Button=Pressed
+[250] X= 77% (50828), Y= 77% (50796), Button=Released
+[255] X= 77% (50780), Y= 77% (50860), Button=Released
+[260] X= 77% (50796), Y= 77% (50796), Button=Released
+[265] X= 77% (50780), Y= 77% (50844), Button=Released
 ~~~~
 6. Raspberry Pi Pico W is now ready and transmitting the Joystick movement data to MacBook Air 2017. 
 
