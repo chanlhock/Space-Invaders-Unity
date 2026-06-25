@@ -143,15 +143,35 @@ I have tested my code on:
 - Raspberry Pi Pico W together with MacBook Air 2017 running Unity 6.4.
 
 ## :film_strip: Screenshots
+Splashscreen searching for joystick:
 <p float="left">
-  <img src="resource/space_invaders_spash_screen.png" width="600" />
+  <img src="resource/screenshots/splash-screen-searching-for-joystick.png" width="600" />
 </p>
+Splashscreen joystick found: 
 <p float="left">
-  <img src="resource/space_invaders_live_screen.png" width="600" /> 
+  <img src="resource/screenshots/splash-screen-joystick-found.png" width="600" /> 
 </p>
+Splashscreen joystick not found, switch to keyboard mode: 
 <p float="left">
-  <img src="resource/space_invaders_game_over.png" width="600" /> 
+  <img src="resource/screenshots/splash-screen-joystick-not-found.png" width="600" /> 
 </p>
+Game screen Joystick mode:
+<p float="left">
+  <img src="resource/screenshots/game-screen-joystick-mode.png" width="600" /> 
+</p>
+Game screen Keyboard mode:
+<p float="left">
+  <img src="resource/screenshots/game-screen-keyboard-mode.png" width="600" /> 
+</p>
+Game over screen, player loss:
+<p float="left">
+  <img src="resource/screenshots/game-over-screen.png" width="600" /> 
+</p>
+Player win game screen:
+<p float="left">
+  <img src="resource/screenshots/player-win-game-screen.png" width="600" /> 
+</p>
+
 
 ## :hourglass_flowing_sand: Chronology of Development Events
 - 8th June 2026: Finally managed to install Unity Editor on my old MacBook Air 2017.
