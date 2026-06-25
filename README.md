@@ -6,11 +6,11 @@
 </p>
 
 <p align="center">
-<i>Life isn’t about finding yourself. Life is about creating yourself.</i><br><br>
+<i>You are never too old to set another goal or dream a new dream.</i><br><br>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ― George Bernard Shaw
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ― C.S. Lewis
 </p> 
 
 ## Table of Contents
