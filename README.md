@@ -195,7 +195,7 @@ If you appreciate my work, do support me by...<br>
 <a href="https://www.buymeacoffee.com/chanlhock" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 ## :new: Changelog
-- [Releases]((https://github.com/chanlhock/Space-Invaders-Unity-2026-06-22_09-46-01/releases))
+- [Releases](https://github.com/chanlhock/Space-Invaders-Unity-2026-06-22_09-46-01/releases)
   
 ## :page_with_curl: License
 ```
